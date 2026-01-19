@@ -19,7 +19,6 @@ import org.gradle.kotlin.dsl.`maven-publish`
 
 plugins {
     `maven-publish`
-    signing
 }
 
 publishing {
@@ -66,17 +65,17 @@ publishing {
             }
         }
     }
-}
 
-signing {
-    if (project.hasProperty("signing.gnupg.keyName")) {
-        useGpgCmd()
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/realmazharhussain/peekaboo")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
     }
-    useInMemoryPgpKeys(
-        System.getenv("OSSRH_GPG_SECRET_KEY"),
-        System.getenv("OSSRH_GPG_SECRET_KEY_PASSWORD"),
-    )
-    sign(publishing.publications)
 }
 
 tasks.withType<AbstractPublishToMaven>().configureEach {

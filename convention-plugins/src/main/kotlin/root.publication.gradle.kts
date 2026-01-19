@@ -13,25 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-plugins {
-    id("io.github.gradle-nexus.publish-plugin")
+
+@Suppress("UnstableApiUsage")
+val detectedVersion by lazy {
+    providers.exec { commandLine("git", "describe", "--tags") }
+        .standardOutput.asText.get().trim()
+        .split('-').take(2)
+        .joinToString(separator = "+")
+        .removePrefix(prefix = "v")
 }
 
 allprojects {
     group = "io.github.onseok"
-    version = "0.5.2"
-}
-
-nexusPublishing {
-    // Configure maven central repository
-    // https://github.com/gradle-nexus/publish-plugin#publishing-to-maven-central-via-sonatype-ossrh
-    repositories {
-        sonatype {
-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-            stagingProfileId.set(System.getenv("OSSRH_STAGING_PROFILE_ID"))
-            username.set(System.getenv("OSSRH_USERNAME"))
-            password.set(System.getenv("OSSRH_PASSWORD"))
-        }
-    }
+    version =  detectedVersion
 }
