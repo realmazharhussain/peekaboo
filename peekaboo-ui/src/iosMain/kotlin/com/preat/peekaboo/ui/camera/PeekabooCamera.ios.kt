@@ -33,10 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.interop.UIKitView
 import kotlinx.cinterop.BetaInteropApi
-import kotlinx.cinterop.CValue
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.ObjCAction
 import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.readValue
 import kotlinx.cinterop.useContents
 import kotlinx.cinterop.usePinned
 import platform.AVFoundation.AVAuthorizationStatusAuthorized
@@ -77,8 +77,8 @@ import platform.AVFoundation.authorizationStatusForMediaType
 import platform.AVFoundation.fileDataRepresentation
 import platform.AVFoundation.position
 import platform.AVFoundation.requestAccessForMediaType
-import platform.CoreGraphics.CGRect
 import platform.CoreGraphics.CGRectMake
+import platform.CoreGraphics.CGRectZero
 import platform.CoreMedia.CMSampleBufferGetImageBuffer
 import platform.CoreMedia.CMSampleBufferRef
 import platform.CoreMedia.kCMPixelFormat_32BGRA
@@ -104,6 +104,7 @@ import platform.UIKit.UIImage
 import platform.UIKit.UIImageOrientation
 import platform.UIKit.UIImagePNGRepresentation
 import platform.UIKit.UIView
+import platform.UIKit.clipsToBounds
 import platform.darwin.DISPATCH_QUEUE_PRIORITY_DEFAULT
 import platform.darwin.NSObject
 import platform.darwin.dispatch_async
@@ -502,8 +503,7 @@ private fun BoxScope.RealDeviceCamera(
         background = Color.Black,
         factory = {
             val dispatchGroup = dispatch_group_create()
-            val cameraContainer = UIView()
-            cameraContainer.layer.addSublayer(cameraPreviewLayer)
+            val cameraContainer = cameraPreviewContainer(cameraPreviewLayer)
             cameraPreviewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
             dispatch_group_enter(dispatchGroup)
             dispatch_async(
@@ -520,13 +520,6 @@ private fun BoxScope.RealDeviceCamera(
             }
             cameraContainer
         },
-        onResize = { view: UIView, rect: CValue<CGRect> ->
-            CATransaction.begin()
-            CATransaction.setValue(true, kCATransactionDisableActions)
-            view.layer.setFrame(rect)
-            cameraPreviewLayer.setFrame(rect)
-            CATransaction.commit()
-        },
     )
     // Call the triggerCapture lambda when the capture button is clicked
     captureIcon(triggerCapture)
@@ -535,6 +528,22 @@ private fun BoxScope.RealDeviceCamera(
         progressIndicator()
     }
 }
+
+@OptIn(ExperimentalForeignApi::class)
+private fun cameraPreviewContainer(previewLayer: AVCaptureVideoPreviewLayer): UIView =
+    object : UIView(frame = CGRectZero.readValue()) {
+        override fun layoutSubviews() {
+            super.layoutSubviews()
+            CATransaction.begin()
+            CATransaction.setValue(true, kCATransactionDisableActions)
+            layer.setFrame(bounds)
+            previewLayer.setFrame(bounds)
+            CATransaction.commit()
+        }
+    }.apply {
+        clipsToBounds = true
+        layer.addSublayer(previewLayer)
+    }
 
 @OptIn(ExperimentalForeignApi::class)
 @Composable
@@ -668,8 +677,7 @@ private fun RealDeviceCamera(
         background = Color.Black,
         factory = {
             val dispatchGroup = dispatch_group_create()
-            val cameraContainer = UIView()
-            cameraContainer.layer.addSublayer(cameraPreviewLayer)
+            val cameraContainer = cameraPreviewContainer(cameraPreviewLayer)
             cameraPreviewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
             dispatch_group_enter(dispatchGroup)
             dispatch_async(queue) {
@@ -680,13 +688,6 @@ private fun RealDeviceCamera(
                 state.onCameraReady()
             }
             cameraContainer
-        },
-        onResize = { view: UIView, rect: CValue<CGRect> ->
-            CATransaction.begin()
-            CATransaction.setValue(true, kCATransactionDisableActions)
-            view.layer.setFrame(rect)
-            cameraPreviewLayer.setFrame(rect)
-            CATransaction.commit()
         },
     )
 }
