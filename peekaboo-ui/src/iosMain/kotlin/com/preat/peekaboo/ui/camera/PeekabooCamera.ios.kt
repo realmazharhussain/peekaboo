@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 package com.preat.peekaboo.ui.camera
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -31,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.interop.UIKitView
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -82,17 +82,12 @@ import platform.CoreGraphics.CGRectZero
 import platform.CoreMedia.CMSampleBufferGetImageBuffer
 import platform.CoreMedia.CMSampleBufferRef
 import platform.CoreMedia.kCMPixelFormat_32BGRA
-import platform.CoreVideo.CVPixelBufferGetBaseAddress
-import platform.CoreVideo.CVPixelBufferGetDataSize
-import platform.CoreVideo.CVPixelBufferLockBaseAddress
-import platform.CoreVideo.CVPixelBufferUnlockBaseAddress
 import platform.CoreVideo.kCVPixelBufferPixelFormatTypeKey
 import platform.Foundation.NSData
 import platform.Foundation.NSError
 import platform.Foundation.NSNotification
 import platform.Foundation.NSNotificationCenter
 import platform.Foundation.NSSelectorFromString
-import platform.Foundation.dataWithBytes
 import platform.QuartzCore.CATransaction
 import platform.QuartzCore.kCATransactionDisableActions
 import platform.UIKit.UIDevice
@@ -104,7 +99,6 @@ import platform.UIKit.UIImage
 import platform.UIKit.UIImageOrientation
 import platform.UIKit.UIImagePNGRepresentation
 import platform.UIKit.UIView
-import platform.UIKit.clipsToBounds
 import platform.darwin.DISPATCH_QUEUE_PRIORITY_DEFAULT
 import platform.darwin.NSObject
 import platform.darwin.dispatch_async
@@ -188,7 +182,7 @@ actual fun PeekabooCamera(
     convertIcon: @Composable (onClick: () -> Unit) -> Unit,
     progressIndicator: @Composable () -> Unit,
     onCapture: (byteArray: ByteArray?) -> Unit,
-    onFrame: ((frame: ByteArray) -> Unit)?,
+    onFrame: ((frame: ImageBitmap) -> Unit)?,
     permissionDeniedContent: @Composable () -> Unit,
 ) {
     val state =
@@ -369,7 +363,7 @@ private fun BoxScope.RealDeviceCamera(
                             uiImage = normalizedImage!!
                         }
                         val imageData = UIImagePNGRepresentation(uiImage)
-                        val byteArray: ByteArray? = imageData?.toByteArray()
+                        val byteArray: ByteArray? = imageData?.toPeekabooByteArray()
                         onCapture(byteArray)
                     }
                     capturePhotoStarted = false
@@ -729,7 +723,7 @@ class OrientationListener(
 }
 
 class CameraFrameAnalyzerDelegate(
-    private val onFrame: ((frame: ByteArray) -> Unit)?,
+    private val onFrame: ((frame: ImageBitmap) -> Unit)?,
 ) : NSObject(), AVCaptureVideoDataOutputSampleBufferDelegateProtocol {
     @OptIn(ExperimentalForeignApi::class)
     override fun captureOutput(
@@ -741,14 +735,8 @@ class CameraFrameAnalyzerDelegate(
         if (onFrame == null) return
 
         val imageBuffer = CMSampleBufferGetImageBuffer(didOutputSampleBuffer) ?: return
-        CVPixelBufferLockBaseAddress(imageBuffer, 0uL)
-        val baseAddress = CVPixelBufferGetBaseAddress(imageBuffer)
-        val bufferSize = CVPixelBufferGetDataSize(imageBuffer)
-        val data = NSData.dataWithBytes(bytes = baseAddress, length = bufferSize)
-        CVPixelBufferUnlockBaseAddress(imageBuffer, 0uL)
-
-        val bytes = data.toByteArray()
-        onFrame.invoke(bytes)
+        val bitmap = imageBuffer.toImageBitmapOrNull() ?: return
+        onFrame.invoke(bitmap)
     }
 }
 
@@ -784,21 +772,9 @@ class PhotoCaptureDelegate(
                 uiImage = normalizedImage!!
             }
             val imageData = UIImagePNGRepresentation(uiImage)
-            val byteArray: ByteArray? = imageData?.toByteArray()
+            val byteArray: ByteArray? = imageData?.toPeekabooByteArray()
             onCapture(byteArray)
         }
         onCaptureEnd()
     }
-}
-
-@OptIn(ExperimentalForeignApi::class)
-private fun NSData.toByteArray(): ByteArray {
-    val size = length.toInt()
-    val byteArray = ByteArray(size)
-    if (size > 0) {
-        byteArray.usePinned { pinned ->
-            memcpy(pinned.addressOf(0), this.bytes, this.length)
-        }
-    }
-    return byteArray
 }

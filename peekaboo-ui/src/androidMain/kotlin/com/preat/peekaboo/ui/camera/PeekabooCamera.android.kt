@@ -34,6 +34,8 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -54,7 +56,7 @@ actual fun PeekabooCamera(
     convertIcon: @Composable (onClick: () -> Unit) -> Unit,
     progressIndicator: @Composable () -> Unit,
     onCapture: (byteArray: ByteArray?) -> Unit,
-    onFrame: ((frame: ByteArray) -> Unit)?,
+    onFrame: ((frame: ImageBitmap) -> Unit)?,
     permissionDeniedContent: @Composable () -> Unit,
 ) {
     val state =
@@ -151,8 +153,7 @@ private fun CameraWithGrantedPermission(
 
                 analyzer.apply {
                     setAnalyzer(backgroundExecutor) { imageProxy ->
-                        val imageBytes = imageProxy.toByteArray()
-                        onFrame(imageBytes)
+                        onFrame(imageProxy.toImageBitmap())
                     }
                 }
             }
@@ -191,7 +192,7 @@ private fun CameraWithGrantedPermission(
                     imageAnalyzer,
                 ).toTypedArray(),
             )
-            preview.setSurfaceProvider(previewView.surfaceProvider)
+            preview.surfaceProvider = previewView.surfaceProvider
         }
     }
 
@@ -253,4 +254,20 @@ private fun Bitmap.rotate(degrees: Int): ByteArray {
     val matrix = Matrix().apply { postRotate(degrees.toFloat()) }
     val rotatedBitmap = Bitmap.createBitmap(this, 0, 0, this.width, this.height, matrix, true)
     return rotatedBitmap.toByteArray()
+}
+
+private fun ImageProxy.toImageBitmap(): ImageBitmap {
+    val rotationDegrees = imageInfo.rotationDegrees
+    val bitmap = toBitmap()
+    val rotatedBitmap =
+        if (rotationDegrees != 0) {
+            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, Matrix().apply {
+                postRotate(rotationDegrees.toFloat())
+            }, true)
+        } else {
+            bitmap
+        }
+    val imageBitmap = rotatedBitmap.asImageBitmap()
+    close()
+    return imageBitmap
 }

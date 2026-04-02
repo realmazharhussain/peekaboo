@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:Suppress("DSL_SCOPE_VIOLATION")
 
 import com.diffplug.gradle.spotless.SpotlessExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
     id("root.publication")
-    // trick: for the same plugin versions in all sub-modules
+    // trick: for the same plugin versions in all submodules
     alias(libs.plugins.androidApplication).apply(false)
     alias(libs.plugins.androidLibrary).apply(false)
     alias(libs.plugins.androidKotlinMultiplatformLibrary).apply(false)

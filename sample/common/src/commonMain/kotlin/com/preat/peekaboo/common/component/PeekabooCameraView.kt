@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.preat.peekaboo.common.icon.IconCached
@@ -45,7 +46,7 @@ import com.preat.peekaboo.ui.camera.rememberPeekabooCameraState
 internal fun PeekabooCameraView(
     modifier: Modifier = Modifier,
     onCapture: (ByteArray?) -> Unit,
-    onFrame: (ByteArray) -> Unit,
+    onFrame: (ImageBitmap) -> Unit,
     onBack: () -> Unit,
 ) {
     val state = rememberPeekabooCameraState(onCapture = onCapture, onFrame = onFrame)

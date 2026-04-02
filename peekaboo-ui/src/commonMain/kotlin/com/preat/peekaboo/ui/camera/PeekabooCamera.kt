@@ -17,6 +17,7 @@ package com.preat.peekaboo.ui.camera
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 
 /**
  * `PeekabooCamera` is a composable function that provides a customizable camera UI within a Compose Multiplatform application.
@@ -45,7 +46,7 @@ expect fun PeekabooCamera(
     convertIcon: @Composable (onClick: () -> Unit) -> Unit = {},
     progressIndicator: @Composable () -> Unit = {},
     onCapture: (byteArray: ByteArray?) -> Unit,
-    onFrame: ((frame: ByteArray) -> Unit)? = null,
+    onFrame: ((frame: ImageBitmap) -> Unit)? = null,
     permissionDeniedContent: @Composable () -> Unit = {},
 )
 

@@ -114,7 +114,7 @@ fun App() {
                                 showCamera = false
                             },
                             onFrame = { frame ->
-                                frames = frames + frame.toImageBitmap()
+                                frames = frames + frame
                                 if (frames.size > 15) {
                                     frames = frames.drop(1)
                                 }
