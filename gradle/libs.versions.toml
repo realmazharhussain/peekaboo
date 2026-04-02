@@ -1,13 +1,12 @@
 [versions]
-agp = "8.3.2"
-kotlin = "1.9.23"
-kotlinx-coroutines = "1.8.0"
-compose = "1.6.11"
-compose-compiler = "1.5.13"
-compose-ui = "1.6.7"
-compose-foundation = "1.6.7"
-compose-material3 = "1.2.1"
-androidx-activityCompose = "1.8.2"
+agp = "8.13.2"
+kotlin = "2.3.0"
+kotlinx-coroutines = "1.10.2"
+compose = "1.9.3"
+compose-ui = "1.9.3"
+compose-foundation = "1.9.3"
+compose-material3 = "1.9.0"
+androidx-activityCompose = "1.12.2"
 androidx-lifecycleViewmodelCompose = "2.7.0"
 androidx-annotation = "1.7.1"
 nexus-publish = "2.0.0"
@@ -60,4 +59,5 @@ androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose" }
+composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

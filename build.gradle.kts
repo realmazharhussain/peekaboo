@@ -26,6 +26,7 @@ plugins {
     alias(libs.plugins.kotlinAndroid).apply(false)
     alias(libs.plugins.kotlinMultiplatform).apply(false)
     alias(libs.plugins.composeMultiplatform).apply(false)
+    alias(libs.plugins.composeCompiler).apply(false)
     alias(libs.plugins.spotless).apply(false)
 }
 
@@ -46,7 +47,7 @@ allprojects {
         }
     }
 
-    tasks.withType<KotlinCompile>().all {
-        kotlinOptions { freeCompilerArgs += "-Xexpect-actual-classes" }
+    tasks.withType<KotlinCompile>().configureEach {
+        compilerOptions.freeCompilerArgs.add("-Xexpect-actual-classes")
     }
 }
