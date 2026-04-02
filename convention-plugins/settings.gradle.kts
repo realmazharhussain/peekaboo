@@ -21,6 +21,8 @@ pluginManagement {
     }
 }
 
+rootProject.name = "convention-plugins"
+
 dependencyResolutionManagement {
     repositories {
         google()

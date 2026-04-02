@@ -321,6 +321,7 @@ private fun AuthorizedCamera(
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 @Composable
+@Suppress("DEPRECATION")
 private fun BoxScope.RealDeviceCamera(
     camera: AVCaptureDevice,
     onCameraReady: () -> Unit,
@@ -537,6 +538,7 @@ private fun BoxScope.RealDeviceCamera(
 
 @OptIn(ExperimentalForeignApi::class)
 @Composable
+@Suppress("DEPRECATION")
 private fun RealDeviceCamera(
     state: PeekabooCameraState,
     camera: AVCaptureDevice,
@@ -789,7 +791,7 @@ class PhotoCaptureDelegate(
 }
 
 @OptIn(ExperimentalForeignApi::class)
-private inline fun NSData.toByteArray(): ByteArray {
+private fun NSData.toByteArray(): ByteArray {
     val size = length.toInt()
     val byteArray = ByteArray(size)
     if (size > 0) {

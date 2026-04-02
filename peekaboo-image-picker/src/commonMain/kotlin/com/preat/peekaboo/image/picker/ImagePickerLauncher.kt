@@ -15,7 +15,6 @@
  */
 package com.preat.peekaboo.image.picker
 
-import androidx.annotation.FloatRange
 import androidx.compose.runtime.Composable
 import kotlinx.coroutines.CoroutineScope
 
@@ -46,9 +45,14 @@ data class ResizeOptions(
     val width: Int = DEFAULT_RESIZE_IMAGE_WIDTH,
     val height: Int = DEFAULT_RESIZE_IMAGE_HEIGHT,
     val resizeThresholdBytes: Long = DEFAULT_RESIZE_THRESHOLD_BYTES,
-    @FloatRange(from = 0.0, to = 1.0)
     val compressionQuality: Double = 1.0,
-)
+) {
+    init {
+        require(compressionQuality in 0.0..1.0) {
+            "compressionQuality must be between 0.0 and 1.0"
+        }
+    }
+}
 
 sealed interface FilterOptions {
     data object Default : FilterOptions

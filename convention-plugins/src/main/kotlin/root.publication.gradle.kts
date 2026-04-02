@@ -25,5 +25,5 @@ val detectedVersion by lazy {
 
 allprojects {
     group = "io.github.onseok"
-    version =  detectedVersion
+    version = detectedVersion
 }

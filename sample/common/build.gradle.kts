@@ -19,12 +19,16 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
 }
 
 kotlin {
     applyDefaultHierarchyTemplate()
-    androidTarget {
+    android {
+        namespace = "com.preat.peekaboo.sample.common"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        withJava()
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
@@ -65,22 +69,5 @@ kotlin {
         }
 
         val androidMain by getting
-
-        val iosMain by getting
-    }
-}
-
-android {
-    namespace = "com.preat.peekaboo.sample.common"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    sourceSets["main"].res.srcDirs("src/androidMain/res")
-    sourceSets["main"].resources.srcDirs("src/commonMain/resources")
-
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
     }
 }

@@ -17,15 +17,21 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     id("module.publication")
 }
 
 kotlin {
-    androidTarget {
-        publishLibraryVariants("release")
+    android {
+        namespace = "com.preat.peekaboo.ui"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        withJava()
+        androidResources {
+            enable = true
+        }
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
@@ -41,8 +47,6 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material)
             implementation(libs.components.resources)
-            implementation(libs.paging.common)
-            implementation(libs.paging.compose.common)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -55,19 +59,8 @@ kotlin {
             implementation(libs.camera.lifecycle)
             implementation(libs.camera.view)
             implementation(libs.kotlinx.coroutines.guava)
+            implementation(libs.paging.common)
+            implementation(libs.paging.compose.common)
         }
-    }
-}
-
-android {
-    namespace = "com.preat.peekaboo.ui"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    sourceSets["main"].res.srcDirs("src/androidMain/res")
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
     }
 }
