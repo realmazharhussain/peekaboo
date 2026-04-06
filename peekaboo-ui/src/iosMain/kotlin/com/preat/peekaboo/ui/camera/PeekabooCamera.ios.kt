@@ -30,12 +30,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.interop.UIKitView
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.ObjCAction
-import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.asStableRef
+import kotlinx.cinterop.pointed
 import kotlinx.cinterop.readValue
 import kotlinx.cinterop.useContents
 import kotlinx.cinterop.usePinned
@@ -79,11 +79,9 @@ import platform.AVFoundation.position
 import platform.AVFoundation.requestAccessForMediaType
 import platform.CoreGraphics.CGRectMake
 import platform.CoreGraphics.CGRectZero
-import platform.CoreMedia.CMSampleBufferGetImageBuffer
 import platform.CoreMedia.CMSampleBufferRef
 import platform.CoreMedia.kCMPixelFormat_32BGRA
 import platform.CoreVideo.kCVPixelBufferPixelFormatTypeKey
-import platform.Foundation.NSData
 import platform.Foundation.NSError
 import platform.Foundation.NSNotification
 import platform.Foundation.NSNotificationCenter
@@ -109,7 +107,6 @@ import platform.darwin.dispatch_group_enter
 import platform.darwin.dispatch_group_leave
 import platform.darwin.dispatch_group_notify
 import platform.darwin.dispatch_queue_create
-import platform.posix.memcpy
 
 private val deviceTypes =
     listOf(
@@ -182,7 +179,7 @@ actual fun PeekabooCamera(
     convertIcon: @Composable (onClick: () -> Unit) -> Unit,
     progressIndicator: @Composable () -> Unit,
     onCapture: (byteArray: ByteArray?) -> Unit,
-    onFrame: ((frame: ImageBitmap) -> Unit)?,
+    onFrame: ((frame: CameraFrame) -> Unit)?,
     permissionDeniedContent: @Composable () -> Unit,
 ) {
     val state =
@@ -363,7 +360,7 @@ private fun BoxScope.RealDeviceCamera(
                             uiImage = normalizedImage!!
                         }
                         val imageData = UIImagePNGRepresentation(uiImage)
-                        val byteArray: ByteArray? = imageData?.toPeekabooByteArray()
+                        val byteArray: ByteArray? = imageData?.toByteArray()
                         onCapture(byteArray)
                     }
                     capturePhotoStarted = false
@@ -723,7 +720,7 @@ class OrientationListener(
 }
 
 class CameraFrameAnalyzerDelegate(
-    private val onFrame: ((frame: ImageBitmap) -> Unit)?,
+    private val onFrame: ((frame: CameraFrame) -> Unit)?,
 ) : NSObject(), AVCaptureVideoDataOutputSampleBufferDelegateProtocol {
     @OptIn(ExperimentalForeignApi::class)
     override fun captureOutput(
@@ -732,11 +729,7 @@ class CameraFrameAnalyzerDelegate(
         didOutputSampleBuffer: CMSampleBufferRef?,
         fromConnection: AVCaptureConnection,
     ) {
-        if (onFrame == null) return
-
-        val imageBuffer = CMSampleBufferGetImageBuffer(didOutputSampleBuffer) ?: return
-        val bitmap = imageBuffer.toImageBitmapOrNull() ?: return
-        onFrame.invoke(bitmap)
+        onFrame?.invoke(didOutputSampleBuffer?.asCameraFrame() ?: return)
     }
 }
 
@@ -772,7 +765,7 @@ class PhotoCaptureDelegate(
                 uiImage = normalizedImage!!
             }
             val imageData = UIImagePNGRepresentation(uiImage)
-            val byteArray: ByteArray? = imageData?.toPeekabooByteArray()
+            val byteArray: ByteArray? = imageData?.toByteArray()
             onCapture(byteArray)
         }
         onCaptureEnd()

@@ -136,7 +136,7 @@ fun CustomCameraView() {
 ```kotlin
 rememberPeekabooCameraState(
     initialCameraMode: CameraMode = CameraMode.Back,
-    onFrame: ((frame: ImageBitmap) -> Unit)? = null,
+    onFrame: ((frame: CameraFrame) -> Unit)? = null,
     onCapture: (ByteArray?) -> Unit,
 )
 ```

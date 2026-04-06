@@ -22,12 +22,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.ImageBitmap
 
 @Stable
 actual class PeekabooCameraState(
     cameraMode: CameraMode,
-    internal var onFrame: ((frame: ImageBitmap) -> Unit)?,
+    internal var onFrame: ((frame: CameraFrame) -> Unit)?,
     internal var onCapture: (ByteArray?) -> Unit,
 ) {
     actual var isCameraReady: Boolean by mutableStateOf(false)
@@ -61,7 +60,7 @@ actual class PeekabooCameraState(
 
     companion object {
         fun saver(
-            onFrame: ((frame: ImageBitmap) -> Unit)?,
+            onFrame: ((frame: CameraFrame) -> Unit)?,
             onCapture: (ByteArray?) -> Unit,
         ): Saver<PeekabooCameraState, Int> {
             return Saver(
@@ -83,7 +82,7 @@ actual class PeekabooCameraState(
 @Composable
 actual fun rememberPeekabooCameraState(
     initialCameraMode: CameraMode,
-    onFrame: ((frame: ImageBitmap) -> Unit)?,
+    onFrame: ((frame: CameraFrame) -> Unit)?,
     onCapture: (ByteArray?) -> Unit,
 ): PeekabooCameraState {
     return rememberSaveable(
