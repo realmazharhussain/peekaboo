@@ -75,6 +75,7 @@ import platform.AVFoundation.AVCaptureVideoDataOutputSampleBufferDelegateProtoco
 import platform.AVFoundation.AVCaptureVideoOrientationLandscapeLeft
 import platform.AVFoundation.AVCaptureVideoOrientationLandscapeRight
 import platform.AVFoundation.AVCaptureVideoOrientationPortrait
+import platform.AVFoundation.AVCaptureVideoOrientationPortraitUpsideDown
 import platform.AVFoundation.AVCaptureVideoPreviewLayer
 import platform.AVFoundation.AVLayerVideoGravityResizeAspectFill
 import platform.AVFoundation.AVMediaTypeVideo
@@ -463,7 +464,7 @@ class OrientationListener(
                     AVCaptureVideoOrientationLandscapeLeft
 
                 UIDeviceOrientation.UIDeviceOrientationPortraitUpsideDown ->
-                    AVCaptureVideoOrientationPortrait
+                    AVCaptureVideoOrientationPortraitUpsideDown
 
                 else -> cameraConnection?.videoOrientation ?: AVCaptureVideoOrientationPortrait
             }
