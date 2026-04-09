@@ -35,10 +35,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.preat.peekaboo.ui.camera.CameraFrame
 import com.preat.peekaboo.common.icon.IconCached
 import com.preat.peekaboo.common.icon.IconClose
 import com.preat.peekaboo.common.icon.IconWarning
+import com.preat.peekaboo.ui.camera.CameraFrame
 import com.preat.peekaboo.ui.camera.PeekabooCamera
 import com.preat.peekaboo.ui.camera.rememberPeekabooCameraState
 

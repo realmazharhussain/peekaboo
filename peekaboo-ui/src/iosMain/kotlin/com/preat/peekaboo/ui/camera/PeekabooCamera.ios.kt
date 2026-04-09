@@ -85,17 +85,17 @@ import platform.AVFoundation.authorizationStatusForMediaType
 import platform.AVFoundation.fileDataRepresentation
 import platform.AVFoundation.position
 import platform.AVFoundation.requestAccessForMediaType
-import platform.CoreGraphics.CGRectMake
-import platform.CoreGraphics.CGRectZero
-import platform.CoreMedia.CMSampleBufferRef
-import platform.CoreMedia.CMGetAttachment
-import platform.CoreMedia.kCMSampleBufferAttachmentKey_DroppedFrameReason
-import platform.CoreMedia.kCMPixelFormat_32BGRA
 import platform.CoreFoundation.CFStringGetCString
 import platform.CoreFoundation.CFStringGetLength
 import platform.CoreFoundation.CFStringGetMaximumSizeForEncoding
 import platform.CoreFoundation.CFStringRef
 import platform.CoreFoundation.kCFStringEncodingUTF8
+import platform.CoreGraphics.CGRectMake
+import platform.CoreGraphics.CGRectZero
+import platform.CoreMedia.CMGetAttachment
+import platform.CoreMedia.CMSampleBufferRef
+import platform.CoreMedia.kCMPixelFormat_32BGRA
+import platform.CoreMedia.kCMSampleBufferAttachmentKey_DroppedFrameReason
 import platform.CoreVideo.kCVPixelBufferPixelFormatTypeKey
 import platform.Foundation.NSError
 import platform.Foundation.NSNotification
@@ -138,11 +138,12 @@ private fun CameraUnavailableScreen(modifier: Modifier = Modifier) {
         text = "Camera is not available on simulator. Please try to run on a real iOS device.",
         textAlign = TextAlign.Center,
         color = Color.White,
-        modifier = modifier
-            .background(Color.Black)
-            .fillMaxSize()
-            .wrapContentSize(Alignment.Center)
-            .padding(all = 20.dp)
+        modifier =
+            modifier
+                .background(Color.Black)
+                .fillMaxSize()
+                .wrapContentSize(Alignment.Center)
+                .padding(all = 20.dp),
     )
 }
 
@@ -193,7 +194,7 @@ actual fun PeekabooCamera(
             CameraAccess.Authorized -> {
                 AuthorizedCamera(
                     state = state,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
                 )
             }
         }
@@ -273,7 +274,7 @@ private fun AuthorizedCamera(
         RealDeviceCamera(
             state = state,
             camera = camera,
-            modifier = modifier
+            modifier = modifier,
         )
     } else {
         CameraUnavailableScreen(modifier)
@@ -281,9 +282,10 @@ private fun AuthorizedCamera(
 
     if (camera != null && !state.isCameraReady) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.Black),
         )
     }
 }
