@@ -142,6 +142,8 @@ private fun CameraWithGrantedPermission(
     val backgroundExecutor = remember { Executors.newSingleThreadExecutor() }
     val imageAnalyzer =
         remember(state.onFrame) {
+            var count = 0
+
             state.onFrame?.let { onFrame ->
                 val analyzer =
                     ImageAnalysis.Builder()
@@ -151,7 +153,7 @@ private fun CameraWithGrantedPermission(
 
                 analyzer.apply {
                     setAnalyzer(backgroundExecutor) { imageProxy ->
-                        imageProxy.use { onFrame(it.asCameraFrame()) }
+                        onFrame(imageProxy.asCameraFrame(tag = ++count))
                     }
                 }
             }
