@@ -408,6 +408,7 @@ private fun RealDeviceCamera(
         }
 
         dispatch_group_notify(dispatchGroup, dispatch_get_main_queue()) {
+            applyVideoOrientation(cameraPreviewLayer, capturePhotoOutput, videoOutput)
             state.onCameraReady()
         }
     }
@@ -415,6 +416,8 @@ private fun RealDeviceCamera(
     DisposableEffect(cameraPreviewLayer, capturePhotoOutput, videoOutput, state) {
         val listener = OrientationListener(cameraPreviewLayer, capturePhotoOutput, videoOutput)
         val notificationName = platform.UIKit.UIDeviceOrientationDidChangeNotification
+        UIDevice.currentDevice.beginGeneratingDeviceOrientationNotifications()
+        listener.applyCurrentOrientation()
         NSNotificationCenter.defaultCenter.addObserver(
             observer = listener,
             selector =
@@ -431,6 +434,7 @@ private fun RealDeviceCamera(
                 name = notificationName,
                 `object` = null,
             )
+            UIDevice.currentDevice.endGeneratingDeviceOrientationNotifications()
         }
     }
 
@@ -441,7 +445,41 @@ private fun RealDeviceCamera(
             cameraPreviewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
             cameraPreviewContainer(cameraPreviewLayer)
         },
+        update = {
+            applyVideoOrientation(cameraPreviewLayer, capturePhotoOutput, videoOutput)
+        },
     )
+}
+
+private fun applyVideoOrientation(
+    cameraPreviewLayer: AVCaptureVideoPreviewLayer,
+    capturePhotoOutput: AVCapturePhotoOutput,
+    videoOutput: AVCaptureVideoDataOutput,
+) {
+    val cameraConnection = cameraPreviewLayer.connection
+    val actualOrientation =
+        when (UIDevice.currentDevice.orientation) {
+            UIDeviceOrientation.UIDeviceOrientationPortrait ->
+                AVCaptureVideoOrientationPortrait
+
+            UIDeviceOrientation.UIDeviceOrientationLandscapeLeft ->
+                AVCaptureVideoOrientationLandscapeRight
+
+            UIDeviceOrientation.UIDeviceOrientationLandscapeRight ->
+                AVCaptureVideoOrientationLandscapeLeft
+
+            UIDeviceOrientation.UIDeviceOrientationPortraitUpsideDown ->
+                AVCaptureVideoOrientationPortraitUpsideDown
+
+            else -> AVCaptureVideoOrientationPortrait
+        }
+    if (cameraConnection != null) {
+        cameraConnection.videoOrientation = actualOrientation
+    }
+    capturePhotoOutput.connectionWithMediaType(AVMediaTypeVideo)
+        ?.videoOrientation = actualOrientation
+    videoOutput.connectionWithMediaType(AVMediaTypeVideo)
+        ?.videoOrientation = actualOrientation
 }
 
 class OrientationListener(
@@ -449,34 +487,15 @@ class OrientationListener(
     private val capturePhotoOutput: AVCapturePhotoOutput,
     private val videoOutput: AVCaptureVideoDataOutput,
 ) : NSObject() {
+    fun applyCurrentOrientation() {
+        applyVideoOrientation(cameraPreviewLayer, capturePhotoOutput, videoOutput)
+    }
+
     @OptIn(BetaInteropApi::class)
     @Suppress("UNUSED_PARAMETER")
     @ObjCAction
     fun orientationDidChange(arg: NSNotification) {
-        val cameraConnection = cameraPreviewLayer.connection
-        val actualOrientation =
-            when (UIDevice.currentDevice.orientation) {
-                UIDeviceOrientation.UIDeviceOrientationPortrait ->
-                    AVCaptureVideoOrientationPortrait
-
-                UIDeviceOrientation.UIDeviceOrientationLandscapeLeft ->
-                    AVCaptureVideoOrientationLandscapeRight
-
-                UIDeviceOrientation.UIDeviceOrientationLandscapeRight ->
-                    AVCaptureVideoOrientationLandscapeLeft
-
-                UIDeviceOrientation.UIDeviceOrientationPortraitUpsideDown ->
-                    AVCaptureVideoOrientationPortraitUpsideDown
-
-                else -> cameraConnection?.videoOrientation ?: AVCaptureVideoOrientationPortrait
-            }
-        if (cameraConnection != null) {
-            cameraConnection.videoOrientation = actualOrientation
-        }
-        capturePhotoOutput.connectionWithMediaType(AVMediaTypeVideo)
-            ?.videoOrientation = actualOrientation
-        videoOutput.connectionWithMediaType(AVMediaTypeVideo)
-            ?.videoOrientation = actualOrientation
+        applyCurrentOrientation()
     }
 }
 
